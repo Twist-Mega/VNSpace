@@ -38,6 +38,11 @@ namespace VNSpace
             this.vn = vn;
         }
 
+        public void SetRating(float rating)
+        {
+            this.rating = rating;
+        }
+
         public void SetNotes(string notes)
         {
             this.notes = notes;

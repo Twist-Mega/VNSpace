@@ -6,16 +6,38 @@ namespace VNSpace
 {
     class VisualNovel
     {
-        protected string name;
-        protected string company; //change to [struct] Company company later
-        protected string writer; //change to Author writer later
-        protected bool coverArt; //change to Cover coverArt
+        private string name; //primary title
+        private string company; //company that produced/developed the work
+        private string writer; //writer that wrote scenario
 
-        public VisualNovel(string name, string company, string writer, bool coverArt){
+        //the following is largely only relevant for VNDB linked VNs
+        private string? vndbid; //string for vndb ID variable
+        private string? coverArtURL; //change to Cover coverArt
+        private float? averageRating;
+        private int? voteCount; //number of votes
+        private string? altName; //alternate name
+
+        //constructor with vndb info
+        public VisualNovel(string name, string company, string writer, string? coverArt, string? id){
             this.name = name;
             this.company = company;
             this.writer = writer;
-            this.coverArt = coverArt;
+            this.coverArtURL = coverArt;
+            this.vndbid = id;
+        }
+
+        //constructor without vndb info
+        public VisualNovel(string name, string company, string writer)
+        {
+            this.name = name;
+            this.company = company;
+            this.writer = writer;
+        }
+
+        //function to check if visual novel is linked to VNDB
+        public bool IsLinkedToVNDB()
+        {
+            return vndbid != null;
         }
     }
 }

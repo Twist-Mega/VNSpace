@@ -1,11 +1,11 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-
 namespace VNSpace
 {
     public partial class MainWindow : Window
     {
         private VNLibrary library;
+        private UserEntry? currentEntry; // nullable fixes the non-nullable warning
 
         public MainWindow()
         {
@@ -38,13 +38,27 @@ namespace VNSpace
 
         private void VnListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            UserEntry selected = vnListBox.SelectedItem as UserEntry;
+            UserEntry? selected = vnListBox.SelectedItem as UserEntry;
             if (selected == null) return;
 
+            currentEntry = selected;
             titleLabel.Text = selected.GetVN().GetName();
-            companyLabel.Text = selected.GetVN().GetCompany();
+            companyWriterLabel.Text = $"{selected.GetVN().GetCompany()} · {selected.GetVN().GetWriter()}";
             statusText.Text = selected.GetStatusLabel();
             ratingLabel.Text = selected.GetRating().HasValue ? $"{selected.GetRating()}/10" : "Unrated";
+            playtimeLabel.Text = selected.GetPlayTime().HasValue ? $"{selected.GetPlayTime()} hrs" : "—";
+            startDateLabel.Text = selected.GetStartDate().HasValue ? selected.GetStartDate().ToString() : "—";
+            finishDateLabel.Text = selected.GetFinishDate().HasValue ? selected.GetFinishDate().ToString() : "—";
+            categoryLabel.Text = selected.GetCategory() ?? "—";
+            vndbRatingLabel.Text = selected.GetVN().GetAverageRating().HasValue ? $"{selected.GetVN().GetAverageRating()}/100" : "—";
+            notesBox.Text = selected.GetNotes() ?? "";
+            vndbBadge.Visibility = selected.GetVN().IsLinkedToVNDB() ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void SaveNotesBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentEntry == null) return;
+            currentEntry.SetNotes(notesBox.Text);
         }
 
         private void AddVNBtn_Click(object sender, RoutedEventArgs e)
@@ -52,6 +66,11 @@ namespace VNSpace
             library.AddVN("New VN", "Unknown", "Unknown");
             vnListBox.ItemsSource = null;
             vnListBox.ItemsSource = library.GetAllEntries();
+        }
+
+        private void LaunchBtn_Click(object sender, RoutedEventArgs e)
+        {
+            // placeholder for now
         }
     }
 }

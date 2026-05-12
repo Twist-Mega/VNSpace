@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:VNSpace"
         mc:Ignorable="d"
-        Title="VNSpace_Main" Height="600" Width="800">
+        Title="VNSpace_Main" Height="600" Width="900"
+        Background="#313338">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="225"/>
@@ -13,30 +14,120 @@
         </Grid.ColumnDefinitions>
 
         <!-- Left panel -->
-        <DockPanel Grid.Column="0">
-
-            <!-- View toggle buttons at top -->
+        <DockPanel Grid.Column="0" Background="#2b2d31">
             <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
-                <Button x:Name="titleViewBtn" Content="Title" Click="TitleViewBtn_Click" Width="75"/>
-                <Button x:Name="statusViewBtn" Content="Status" Click="StatusViewBtn_Click" Width="75"/>
-                <Button x:Name="categoryViewBtn" Content="Category" Click="CategoryViewBtn_Click" Width="75"/>
+                <Button x:Name="titleViewBtn" Content="Title" Click="TitleViewBtn_Click" Width="75"
+                        Background="#2b2d31" Foreground="#dbdee1" BorderBrush="#1e1f22"/>
+                <Button x:Name="statusViewBtn" Content="Status" Click="StatusViewBtn_Click" Width="75"
+                        Background="#2b2d31" Foreground="#dbdee1" BorderBrush="#1e1f22"/>
+                <Button x:Name="categoryViewBtn" Content="Category" Click="CategoryViewBtn_Click" Width="75"
+                        Background="#2b2d31" Foreground="#dbdee1" BorderBrush="#1e1f22"/>
             </StackPanel>
-
-            <!-- Add VN button at bottom -->
-            <Button DockPanel.Dock="Bottom" x:Name="addVNBtn" Content="+ Add VN" Click="AddVNBtn_Click"/>
-
-            <!-- Library list fills remaining space -->
-            <ListBox x:Name="vnListBox" SelectionChanged="VnListBox_SelectionChanged"/>
-
+            <Button DockPanel.Dock="Bottom" x:Name="addVNBtn" Content="+ Add VN" 
+                    Click="AddVNBtn_Click" Margin="10" Background="Transparent"
+                    BorderBrush="#4e5058" BorderThickness="1" Foreground="#b5bac1"/>
+            <ListBox x:Name="vnListBox" SelectionChanged="VnListBox_SelectionChanged"
+                     Background="#2b2d31" Foreground="#dbdee1" BorderThickness="0"/>
         </DockPanel>
 
         <!-- Right panel -->
-        <StackPanel Grid.Column="1" Margin="10">
-            <TextBlock x:Name="titleLabel" FontSize="18"/>
-            <TextBlock x:Name="companyLabel"/>
-            <TextBlock x:Name="statusText"/>
-            <TextBlock x:Name="ratingLabel"/>
-        </StackPanel>
+        <Grid Grid.Column="1" Background="#313338">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
+            <!-- Top section: cover art + info -->
+            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="15">
+                <!-- Cover art -->
+                <Border Width="100" Height="140" Background="#1e1f22" 
+                        CornerRadius="6" Margin="0 0 15 0">
+                    <Image x:Name="coverArtImage" Stretch="Uniform"/>
+                </Border>
+
+                <!-- Info next to cover art -->
+                <StackPanel VerticalAlignment="Top" Margin="0 5 0 0">
+                    <TextBlock x:Name="titleLabel" FontSize="20" FontWeight="Bold" 
+                               Foreground="#f2f3f5" TextWrapping="Wrap" MaxWidth="400"/>
+                    <TextBlock x:Name="companyWriterLabel" Foreground="#b5bac1" 
+                               Margin="0 4 0 0"/>
+                    <!-- Status and VNDB badges -->
+                    <StackPanel Orientation="Horizontal" Margin="0 8 0 0">
+                        <Border Background="#1a3a2a" CornerRadius="10" Padding="10 4">
+                            <TextBlock x:Name="statusText" Foreground="#23a55a" FontSize="12"/>
+                        </Border>
+                        <Border Background="#2a2a4a" CornerRadius="10" 
+                                Padding="10 4" Margin="8 0 0 0"
+                                x:Name="vndbBadge" Visibility="Collapsed">
+                            <TextBlock Text="VNDB linked" Foreground="#7289da" FontSize="12"/>
+                        </Border>
+                    </StackPanel>
+                    <!-- Rating -->
+                    <TextBlock x:Name="ratingLabel" Foreground="#f0a030" 
+                               Margin="0 8 0 0" FontSize="14"/>
+                    <!-- Launch button -->
+                    <Button x:Name="launchBtn" Content="Launch" Click="LaunchBtn_Click"
+                            Margin="0 8 0 0" Width="100" HorizontalAlignment="Left"
+                            Background="#4e5058" Foreground="#f2f3f5" 
+                            BorderBrush="#4e5058" Visibility="Collapsed"/>
+                </StackPanel>
+            </StackPanel>
+
+            <!-- Bottom section: metadata + notes -->
+            <Grid Grid.Row="1" Margin="15 0 15 15">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="200"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Metadata left column -->
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="VNDB RATING" Foreground="#80848e" FontSize="11"/>
+                    <TextBlock x:Name="vndbRatingLabel" Foreground="#dbdee1" 
+                               Margin="0 2 0 12"/>
+
+                    <TextBlock Text="PLAYTIME" Foreground="#80848e" FontSize="11"/>
+                    <TextBlock x:Name="playtimeLabel" Foreground="#dbdee1" 
+                               Margin="0 2 0 12"/>
+
+                    <!-- Start and finish dates side by side -->
+                    <StackPanel Orientation="Horizontal" Margin="0 0 0 12">
+                        <StackPanel Margin="0 0 40 0">
+                            <TextBlock Text="STARTED" Foreground="#80848e" FontSize="11"/>
+                            <TextBlock x:Name="startDateLabel" Foreground="#dbdee1" 
+                                       Margin="0 2 0 0"/>
+                        </StackPanel>
+                        <StackPanel>
+                            <TextBlock Text="FINISHED" Foreground="#80848e" FontSize="11"/>
+                            <TextBlock x:Name="finishDateLabel" Foreground="#dbdee1" 
+                                       Margin="0 2 0 0"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <TextBlock Text="CATEGORY" Foreground="#80848e" FontSize="11"/>
+                    <TextBlock x:Name="categoryLabel" Foreground="#dbdee1" 
+                               Margin="0 2 0 12"/>
+
+                    <TextBlock Text="VOICE ACTORS" Foreground="#80848e" FontSize="11"/>
+                    <TextBlock x:Name="voiceActorsLabel" Foreground="#dbdee1" 
+                               Margin="0 2 0 0" TextWrapping="Wrap"/>
+                </StackPanel>
+
+                <!-- Notes right column -->
+                <StackPanel Grid.Column="1" Margin="15 0 0 0">
+                    <TextBlock Text="NOTES" Foreground="#80848e" FontSize="11" 
+                               Margin="0 0 0 6"/>
+                    <TextBox x:Name="notesBox" Height="300" TextWrapping="Wrap"
+                             AcceptsReturn="True" Background="#1e1f22" 
+                             Foreground="#dbdee1" BorderBrush="#1e1f22"
+                             Padding="8" VerticalScrollBarVisibility="Auto"
+                             CaretBrush="#dbdee1"/>
+                    <Button x:Name="saveNotesBtn" Content="Save Notes" 
+                            Click="SaveNotesBtn_Click" Margin="0 6 0 0"
+                            Background="#4e5058" Foreground="#f2f3f5" 
+                            BorderBrush="#4e5058"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
     </Grid>
 </Window>

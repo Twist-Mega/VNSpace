@@ -129,23 +129,23 @@ namespace VNSpace
             switch (status)
             {
                 case statusLabel.Playing:
-                    return "Currently Playing";
+                    return "Playing";
                 case statusLabel.Finished:
                     return "Finished";
                 case statusLabel.Stalled:
-                    return "On Hold";
+                    return "Stalled";
                 case statusLabel.Dropped:
                     return "Dropped";
                 case statusLabel.Planning:
-                    return "Plan to Read";
+                    return "Planning";
                 default:
-                    return "Unknown";
+                    return "No Status";
             }
         }
 
         public override string ToString()
         {
-            return $"{vn.GetName()} — {GetStatusLabel()}";
+            return $"{vn.GetName()}";
         }
     }
 }

@@ -394,6 +394,26 @@ namespace VNSpace
             statusConfirmBtn.Visibility = Visibility.Collapsed;
         }
 
+        /*reset button -- clears all data from database and library*/
+        private void ResetBtn_Click(object sender, RoutedEventArgs e)
+        {
+            /*confirm before wiping everything*/
+            MessageBoxResult confirm = MessageBox.Show(
+                "Are you sure you want to delete all entries? This cannot be undone.",
+                "Reset Data",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning
+            );
+
+            if (confirm == MessageBoxResult.Yes)
+            {
+                db.ResetAllData();
+                library.GetAllEntries().Clear();
+                vnListBox.ItemsSource = null;
+                currentEntry = null;
+            }
+        }
+
         /*launch button -- placeholder until executable path feature is implemented*/
         private void LaunchBtn_Click(object sender, RoutedEventArgs e)
         {

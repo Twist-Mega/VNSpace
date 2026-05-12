@@ -233,5 +233,20 @@ namespace VNSpace
 
             return entries;
         }
+
+        /*deletes all entries from both tables -- used to reset app to clean slate*/
+        public void ResetAllData()
+        {
+            using (SqliteConnection connection = new SqliteConnection($"Data Source={dbPath}"))
+            {
+                connection.Open();
+
+                /*delete user entries first due to foreign key constraint*/
+                new SqliteCommand("DELETE FROM USER_ENTRIES;", connection).ExecuteNonQuery();
+
+                /*then delete all visual novels*/
+                new SqliteCommand("DELETE FROM VISUAL_NOVELS;", connection).ExecuteNonQuery();
+            }
+        }
     }
 }

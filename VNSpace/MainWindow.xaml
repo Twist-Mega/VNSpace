@@ -23,6 +23,9 @@
                 <Button x:Name="categoryViewBtn" Content="Category" Click="CategoryViewBtn_Click" Width="75"
                         Background="#2b2d31" Foreground="#dbdee1" BorderBrush="#1e1f22"/>
             </StackPanel>
+            <Button DockPanel.Dock="Bottom" x:Name="resetBtn" Content="Reset Data"
+        Click="ResetBtn_Click" Margin="10 0 10 4" Background="Transparent"
+        BorderBrush="#da373c" BorderThickness="1" Foreground="#da373c"/>
             <Button DockPanel.Dock="Bottom" x:Name="addVNBtn" Content="+ Add VN"
                     Click="AddVNBtn_Click" Margin="10" Background="Transparent"
                     BorderBrush="#4e5058" BorderThickness="1" Foreground="#b5bac1"/>

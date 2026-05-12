@@ -192,6 +192,12 @@ namespace VNSpace
             vndbRatingLabel.Text = selected.GetVN().GetAverageRating().HasValue ? $"{selected.GetVN().GetAverageRating()}/100" : "—";
             notesBox.Text = selected.GetNotes() ?? "";
             vndbBadge.Visibility = selected.GetVN().IsLinkedToVNDB() ? Visibility.Visible : Visibility.Collapsed;
+
+            /*show launch button only if executable path is set*/
+            execPathLabel.Text = currentEntry.GetVN().GetExecutablePath() ?? "—";
+            launchBtn.Visibility = string.IsNullOrEmpty(currentEntry.GetVN().GetExecutablePath())
+                                   ? Visibility.Collapsed
+                                   : Visibility.Visible;
         }
 
         /*save notes button -- persists notes to database*/

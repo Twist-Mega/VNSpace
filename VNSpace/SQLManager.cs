@@ -36,6 +36,7 @@ namespace VNSpace
                         VoteCount   INTEGER,
 
                         PRIMARY KEY(VN_Id)
+                        ExecPath    TEXT,
                     )";
 
                 /*create USER_ENTRIES table -- stores personal user data for each VN*/
@@ -70,7 +71,7 @@ namespace VNSpace
                 /*insert VN data into VISUAL_NOVELS*/
                 string insertVN = @"
                     INSERT INTO VISUAL_NOVELS (Name, Company, Writer, CoverArtURL, VNDB_Id, AltName, AvgRating, VoteCount)
-                    VALUES (@name, @company, @writer, @coverArt, @vndbId, @altName, @avgRating, @voteCount)";
+                    VALUES (@name, @company, @writer, @coverArt, @vndbId, @altName, @avgRating, @voteCount, @execPath)";
 
                 SqliteCommand vnCmd = new SqliteCommand(insertVN, connection);
                 vnCmd.Parameters.AddWithValue("@name", entry.GetVN().GetName());
@@ -226,6 +227,9 @@ namespace VNSpace
 
                     if (DateTime.TryParse(reader["FinishDate"].ToString(), out DateTime finishDate))
                         entry.SetFinishDate(finishDate);
+
+                    if (!string.IsNullOrEmpty(reader["ExecPath"].ToString()))
+                        vn.SetExecutablePath(reader["ExecPath"].ToString()!);
 
                     entries.Add(entry);
                 }

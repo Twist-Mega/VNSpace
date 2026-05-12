@@ -17,6 +17,8 @@ namespace VNSpace
         private int? voteCount; //number of votes
         private string? altName; //alternate name
 
+        private string? executablePath; /*path to VN executable for launching*/
+
         //constructor with vndb info
         public VisualNovel(string name, string company, string writer, string? coverArt, string? id){
             this.name = name;
@@ -105,6 +107,16 @@ namespace VNSpace
         public bool IsLinkedToVNDB()
         {
             return vndbid != null;
+        }
+
+        public string? GetExecutablePath()
+        {
+            return this.executablePath;
+        }
+
+        public void SetExecutablePath(string path)
+        {
+            this.executablePath = path;
         }
     }
 }

@@ -414,10 +414,53 @@ namespace VNSpace
             }
         }
 
-        /*launch button -- placeholder until executable path feature is implemented*/
+        /*executable path edit and confirm*/
+        private void ExecPathEditBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentEntry == null) return;
+            string current = currentEntry.GetVN().GetExecutablePath() ?? "";
+            EnterEditMode(execPathLabel, execPathInput, execPathEditBtn, execPathConfirmBtn, current);
+        }
+
+        private void ExecPathConfirmBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentEntry == null) return;
+            currentEntry.GetVN().SetExecutablePath(execPathInput.Text.Trim());
+            db.UpdateEntry(currentEntry, currentEntry.GetEntryId());
+
+            /*show launch button if path is set, hide if cleared*/
+            if (!string.IsNullOrEmpty(execPathInput.Text.Trim()))
+            {
+                launchBtn.Visibility = Visibility.Visible;
+                ExitEditMode(execPathLabel, execPathInput, execPathEditBtn, execPathConfirmBtn, execPathInput.Text.Trim());
+            }
+            else
+            {
+                launchBtn.Visibility = Visibility.Collapsed;
+                ExitEditMode(execPathLabel, execPathInput, execPathEditBtn, execPathConfirmBtn, "—");
+            }
+        }
+
+        /*launch button -- launches VN executable*/
         private void LaunchBtn_Click(object sender, RoutedEventArgs e)
         {
-            /*placeholder for now*/
+            if (currentEntry == null) return;
+            string? path = currentEntry.GetVN().GetExecutablePath();
+            if (string.IsNullOrEmpty(path)) return;
+
+            try
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo()
+                {
+                    FileName = path,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Could not launch VN: {ex.Message}", "Launch Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }

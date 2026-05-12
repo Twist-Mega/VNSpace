@@ -5,8 +5,38 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:VNSpace"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="VNSpace_Main" Height="600" Width="800">
     <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="225"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Left panel -->
+        <DockPanel Grid.Column="0">
+
+            <!-- View toggle buttons at top -->
+            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+                <Button x:Name="titleViewBtn" Content="Title" Click="TitleViewBtn_Click" Width="75"/>
+                <Button x:Name="statusViewBtn" Content="Status" Click="StatusViewBtn_Click" Width="75"/>
+                <Button x:Name="categoryViewBtn" Content="Category" Click="CategoryViewBtn_Click" Width="75"/>
+            </StackPanel>
+
+            <!-- Add VN button at bottom -->
+            <Button DockPanel.Dock="Bottom" x:Name="addVNBtn" Content="+ Add VN" Click="AddVNBtn_Click"/>
+
+            <!-- Library list fills remaining space -->
+            <ListBox x:Name="vnListBox" SelectionChanged="VnListBox_SelectionChanged"/>
+
+        </DockPanel>
+
+        <!-- Right panel -->
+        <StackPanel Grid.Column="1" Margin="10">
+            <TextBlock x:Name="titleLabel" FontSize="18"/>
+            <TextBlock x:Name="companyLabel"/>
+            <TextBlock x:Name="statusText"/>
+            <TextBlock x:Name="ratingLabel"/>
+        </StackPanel>
 
     </Grid>
 </Window>

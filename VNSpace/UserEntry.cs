@@ -114,5 +114,38 @@ namespace VNSpace
             return this.status;
         }
 
+        //function to see whether a user's vn entry is marked as finished or not
+        public bool IsComplete()
+        {
+            if (this.status == statusLabel.Finished)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public string GetStatusLabel()
+        {
+            switch (status)
+            {
+                case statusLabel.Playing:
+                    return "Currently Playing";
+                case statusLabel.Finished:
+                    return "Finished";
+                case statusLabel.Stalled:
+                    return "On Hold";
+                case statusLabel.Dropped:
+                    return "Dropped";
+                case statusLabel.Planning:
+                    return "Plan to Read";
+                default:
+                    return "Unknown";
+            }
+        }
+
+        public override string ToString()
+        {
+            return $"{vn.GetName()} — {GetStatusLabel()}";
+        }
     }
 }

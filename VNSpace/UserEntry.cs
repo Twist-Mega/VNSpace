@@ -147,5 +147,19 @@ namespace VNSpace
         {
             return $"{vn.GetName()}";
         }
+
+        /*database ID for this entry -- set after loading from or saving to database*/
+        private long entryId = -1;
+
+        /*get and set for database entry ID*/
+        public long GetEntryId()
+        {
+            return this.entryId;
+        }
+
+        public void SetEntryId(long id)
+        {
+            this.entryId = id;
+        }
     }
 }

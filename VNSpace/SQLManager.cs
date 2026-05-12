@@ -61,7 +61,7 @@ namespace VNSpace
         }
 
         /*saves a new UserEntry to the database -- inserts VN first, then the user entry linked to it*/
-        public void SaveEntry(UserEntry entry)
+        public long SaveEntry(UserEntry entry)
         {
             using (SqliteConnection connection = new SqliteConnection($"Data Source={dbPath}"))
             {
@@ -105,6 +105,9 @@ namespace VNSpace
                 entryCmd.Parameters.AddWithValue("@category", entry.GetCategory() ?? "");
                 entryCmd.Parameters.AddWithValue("@status", entry.GetStatus().ToString() ?? "");
                 entryCmd.ExecuteNonQuery();
+
+                long entryId = (long)new SqliteCommand("SELECT last_insert_rowid();", connection).ExecuteScalar()!;
+                return entryId;
             }
         }
 

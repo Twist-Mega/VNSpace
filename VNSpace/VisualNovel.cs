@@ -4,7 +4,7 @@ using System.Text;
 
 namespace VNSpace
 {
-    class VisualNovel
+    internal class VisualNovel
     {
         private string name; //primary title
         private string company; //company that produced/developed the work

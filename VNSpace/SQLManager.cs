@@ -88,7 +88,7 @@ namespace VNSpace
 
                 SqliteCommand idCmd = new SqliteCommand(getIdQuery, connection);
 
-                long vnId = (long)idCmd.ExecuteScalar();
+                long vnId = (long)idCmd.ExecuteScalar()!;
 
                 /*insert personal user data into USER_ENTRIES, linked to the VN above*/
                 string insertEntry = @"

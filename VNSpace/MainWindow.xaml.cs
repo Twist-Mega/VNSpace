@@ -1,9 +1,10 @@
 ﻿/*Michael Randazzo*/
 /*Interaction logic for MainWindow.xaml*/
 
+using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Linq;
 
 namespace VNSpace
 {
@@ -18,6 +19,13 @@ namespace VNSpace
         /*tracks the currently selected entry in the list*/
         private UserEntry? currentEntry;
 
+        /*tracks which view mode the left panel is in*/
+        /*possible values: "title", "status", "category"*/
+        private string currentView = "title";
+
+        /*tracks whether the left panel is showing groups or drilled-down entries*/
+        private bool isDrilledDown = false;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -30,34 +38,144 @@ namespace VNSpace
             {
                 library.GetAllEntries().Add(entry);
             }
+            library.AddVN("Steins;Gate", "5pb.", "Hayashi Naotaka");
+            library.GetAllEntries().Last().SetStatus(statusLabel.Playing);
+            library.GetAllEntries().Last().SetCategory("Sci-Fi");
 
+            library.AddVN("Clannad", "Key", "Maeda Jun");
+            library.GetAllEntries().Last().SetStatus(statusLabel.Finished);
+            library.GetAllEntries().Last().SetCategory("Romance");
+
+            library.AddVN("Muv-Luv", "âge", "Yoshimune Kouki");
+            library.GetAllEntries().Last().SetStatus(statusLabel.Planning);
+            library.GetAllEntries().Last().SetCategory("Sci-Fi");
+
+
+            ShowTitleView();
+
+
+        }
+
+        /*shows flat list of all VNs sorted by title*/
+        private void ShowTitleView()
+        {
+            currentView = "title";
+            isDrilledDown = false;
+            vnListBox.ItemsSource = null;
             vnListBox.ItemsSource = library.GetAllEntries();
         }
 
-        /*title view button -- shows all VN entries sorted by title*/
+        /*shows all status groups in the listbox*/
+        private void ShowStatusGroups()
+        {
+            currentView = "status";
+            isDrilledDown = false;
+
+            /*build list of status group labels that have at least one entry*/
+            List<string> groups = new List<string>();
+            foreach (statusLabel status in System.Enum.GetValues(typeof(statusLabel)))
+            {
+                List<UserEntry> matching = library.GetAllEntriesbyStatus(status);
+                if (matching.Count > 0)
+                    groups.Add($"{status} ({matching.Count})");
+            }
+
+            vnListBox.ItemsSource = null;
+            vnListBox.ItemsSource = groups;
+        }
+
+        /*shows all unique categories in the listbox*/
+        private void ShowCategoryGroups()
+        {
+            currentView = "category";
+            isDrilledDown = false;
+
+            /*get all unique non-empty categories from library*/
+            List<string> groups = library.GetAllEntries()
+                .Where(e => !string.IsNullOrEmpty(e.GetCategory()))
+                .Select(e => e.GetCategory()!)
+                .Distinct()
+                .ToList();
+
+            /*add uncategorized group if any entries have no category*/
+            int uncategorized = library.GetAllEntries()
+                .Count(e => string.IsNullOrEmpty(e.GetCategory()));
+            if (uncategorized > 0)
+                groups.Add($"Uncategorized ({uncategorized})");
+
+            vnListBox.ItemsSource = null;
+            vnListBox.ItemsSource = groups;
+        }
+
+        /*drills down into a status group -- shows all VNs with that status*/
+        private void DrillDownStatus(string groupLabel)
+        {
+            isDrilledDown = true;
+
+            /*extract the status name from the group label e.g. "Playing (3)" -> "Playing"*/
+            string statusName = groupLabel.Split(' ')[0];
+
+            if (System.Enum.TryParse(statusName, out statusLabel status))
+            {
+                vnListBox.ItemsSource = null;
+                vnListBox.ItemsSource = library.GetAllEntriesbyStatus(status);
+            }
+        }
+
+        /*drills down into a category group -- shows all VNs in that category*/
+        private void DrillDownCategory(string groupLabel)
+        {
+            isDrilledDown = true;
+
+            /*handle uncategorized group separately*/
+            if (groupLabel.StartsWith("Uncategorized"))
+            {
+                vnListBox.ItemsSource = null;
+                vnListBox.ItemsSource = library.GetAllEntries()
+                    .Where(e => string.IsNullOrEmpty(e.GetCategory()))
+                    .ToList();
+                return;
+            }
+
+            vnListBox.ItemsSource = null;
+            vnListBox.ItemsSource = library.GetAllEntriesbyCategory(groupLabel);
+        }
+
+        /*title view button -- shows flat list of all VNs*/
         private void TitleViewBtn_Click(object sender, RoutedEventArgs e)
         {
-            vnListBox.ItemsSource = null;
-            vnListBox.ItemsSource = library.GetAllEntries();
+            ShowTitleView();
         }
 
-        /*status view button -- shows entries filtered by Planning status*/
+        /*status view button -- shows status groups or returns to groups if drilled down*/
         private void StatusViewBtn_Click(object sender, RoutedEventArgs e)
         {
-            vnListBox.ItemsSource = null;
-            vnListBox.ItemsSource = library.GetAllEntriesbyStatus(statusLabel.Planning);
+            ShowStatusGroups();
         }
 
-        /*category view button -- shows entries filtered by category*/
+        /*category view button -- shows category groups or returns to groups if drilled down*/
         private void CategoryViewBtn_Click(object sender, RoutedEventArgs e)
         {
-            vnListBox.ItemsSource = null;
-            vnListBox.ItemsSource = library.GetAllEntriesbyCategory("Mystery");
+            ShowCategoryGroups();
         }
 
-        /*selection changed -- populates right panel with selected entry's data*/
+        /*selection changed -- handles both group selection and VN selection*/
         private void VnListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (vnListBox.SelectedItem == null) return;
+
+            /*check if selected item is a group label string or a UserEntry*/
+            if (vnListBox.SelectedItem is string groupLabel)
+            {
+                /*user clicked a group -- drill down into it*/
+                if (currentView == "status")
+                    DrillDownStatus(groupLabel);
+                else if (currentView == "category")
+                    DrillDownCategory(groupLabel);
+                return;
+            }
+
+            /*user clicked a VN entry -- populate right panel*/
             UserEntry? selected = vnListBox.SelectedItem as UserEntry;
             if (selected == null) return;
 
@@ -106,10 +224,174 @@ namespace VNSpace
                 long newId = db.SaveEntry(dialog.Result);
                 dialog.Result.SetEntryId(newId);
 
-                /*refresh listbox*/
-                vnListBox.ItemsSource = null;
-                vnListBox.ItemsSource = library.GetAllEntries();
+                /*refresh current view*/
+                if (currentView == "title")
+                    ShowTitleView();
+                else if (currentView == "status")
+                    ShowStatusGroups();
+                else if (currentView == "category")
+                    ShowCategoryGroups();
             }
+        }
+
+        /*helper -- swaps a TextBlock to edit mode and shows confirm button*/
+        private void EnterEditMode(TextBlock label, TextBox input, Button editBtn, Button confirmBtn, string currentValue)
+        {
+            input.Text = currentValue == "—" ? "" : currentValue;
+            label.Visibility = Visibility.Collapsed;
+            input.Visibility = Visibility.Visible;
+            editBtn.Visibility = Visibility.Collapsed;
+            confirmBtn.Visibility = Visibility.Visible;
+            input.Focus();
+        }
+
+        /*helper -- swaps back to display mode*/
+        private void ExitEditMode(TextBlock label, TextBox input, Button editBtn, Button confirmBtn, string newValue)
+        {
+            label.Text = newValue;
+            label.Visibility = Visibility.Visible;
+            input.Visibility = Visibility.Collapsed;
+            editBtn.Visibility = Visibility.Visible;
+            confirmBtn.Visibility = Visibility.Collapsed;
+        }
+
+        /*playtime edit and confirm*/
+        private void PlaytimeEditBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentEntry == null) return;
+            string current = currentEntry.GetPlayTime().HasValue ? $"{currentEntry.GetPlayTime()}" : "—";
+            EnterEditMode(playtimeLabel, playtimeInput, playtimeEditBtn, playtimeConfirmBtn, current);
+        }
+
+        private void PlaytimeConfirmBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentEntry == null) return;
+            if (float.TryParse(playtimeInput.Text, out float playTime))
+            {
+                currentEntry.SetPlayTime(playTime);
+                db.UpdateEntry(currentEntry, currentEntry.GetEntryId());
+                ExitEditMode(playtimeLabel, playtimeInput, playtimeEditBtn, playtimeConfirmBtn, $"{playTime} hrs");
+            }
+            else
+            {
+                ExitEditMode(playtimeLabel, playtimeInput, playtimeEditBtn, playtimeConfirmBtn, playtimeLabel.Text);
+            }
+        }
+
+        /*rating edit and confirm*/
+        private void RatingEditBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentEntry == null) return;
+            string current = currentEntry.GetRating().HasValue ? $"{currentEntry.GetRating()}" : "—";
+            EnterEditMode(ratingLabel, ratingInput, ratingEditBtn, ratingConfirmBtn, current);
+        }
+
+        private void RatingConfirmBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentEntry == null) return;
+            if (float.TryParse(ratingInput.Text, out float rating) && rating >= 0 && rating <= 10)
+            {
+                currentEntry.SetRating(rating);
+                db.UpdateEntry(currentEntry, currentEntry.GetEntryId());
+                ExitEditMode(ratingLabel, ratingInput, ratingEditBtn, ratingConfirmBtn, $"{rating}/10");
+            }
+            else
+            {
+                ExitEditMode(ratingLabel, ratingInput, ratingEditBtn, ratingConfirmBtn, ratingLabel.Text);
+            }
+        }
+
+        /*start date edit and confirm*/
+        private void StartDateEditBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentEntry == null) return;
+            string current = currentEntry.GetStartDate().HasValue ? currentEntry.GetStartDate()!.Value.ToShortDateString() : "";
+            EnterEditMode(startDateLabel, startDateInput, startDateEditBtn, startDateConfirmBtn, current);
+        }
+
+        private void StartDateConfirmBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentEntry == null) return;
+            if (DateTime.TryParse(startDateInput.Text, out DateTime date))
+            {
+                currentEntry.SetStartDate(date);
+                db.UpdateEntry(currentEntry, currentEntry.GetEntryId());
+                ExitEditMode(startDateLabel, startDateInput, startDateEditBtn, startDateConfirmBtn, date.ToShortDateString());
+            }
+            else
+            {
+                ExitEditMode(startDateLabel, startDateInput, startDateEditBtn, startDateConfirmBtn, startDateLabel.Text);
+            }
+        }
+
+        /*finish date edit and confirm*/
+        private void FinishDateEditBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentEntry == null) return;
+            string current = currentEntry.GetFinishDate().HasValue ? currentEntry.GetFinishDate()!.Value.ToShortDateString() : "";
+            EnterEditMode(finishDateLabel, finishDateInput, finishDateEditBtn, finishDateConfirmBtn, current);
+        }
+
+        private void FinishDateConfirmBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentEntry == null) return;
+            if (DateTime.TryParse(finishDateInput.Text, out DateTime date))
+            {
+                currentEntry.SetFinishDate(date);
+                db.UpdateEntry(currentEntry, currentEntry.GetEntryId());
+                ExitEditMode(finishDateLabel, finishDateInput, finishDateEditBtn, finishDateConfirmBtn, date.ToShortDateString());
+            }
+            else
+            {
+                ExitEditMode(finishDateLabel, finishDateInput, finishDateEditBtn, finishDateConfirmBtn, finishDateLabel.Text);
+            }
+        }
+
+        /*category edit and confirm*/
+        private void CategoryEditBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentEntry == null) return;
+            string current = currentEntry.GetCategory() ?? "";
+            EnterEditMode(categoryLabel, categoryInput, categoryEditBtn, categoryConfirmBtn, current);
+        }
+
+        private void CategoryConfirmBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentEntry == null) return;
+            currentEntry.SetCategory(categoryInput.Text.Trim());
+            db.UpdateEntry(currentEntry, currentEntry.GetEntryId());
+            ExitEditMode(categoryLabel, categoryInput, categoryEditBtn, categoryConfirmBtn, categoryInput.Text.Trim());
+        }
+
+        /*status edit and confirm -- uses ComboBox instead of TextBox*/
+        private void StatusEditBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentEntry == null) return;
+
+            /*populate ComboBox with all status options*/
+            statusInput.ItemsSource = System.Enum.GetValues(typeof(statusLabel));
+            statusInput.SelectedItem = currentEntry.GetStatus();
+
+            statusText.Visibility = Visibility.Collapsed;
+            statusInput.Visibility = Visibility.Visible;
+            statusEditBtn.Visibility = Visibility.Collapsed;
+            statusConfirmBtn.Visibility = Visibility.Visible;
+        }
+
+        private void StatusConfirmBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentEntry == null) return;
+            if (statusInput.SelectedItem is statusLabel selected)
+            {
+                currentEntry.SetStatus(selected);
+                db.UpdateEntry(currentEntry, currentEntry.GetEntryId());
+            }
+
+            statusText.Text = currentEntry.GetStatusLabel();
+            statusText.Visibility = Visibility.Visible;
+            statusInput.Visibility = Visibility.Collapsed;
+            statusEditBtn.Visibility = Visibility.Visible;
+            statusConfirmBtn.Visibility = Visibility.Collapsed;
         }
 
         /*launch button -- placeholder until executable path feature is implemented*/

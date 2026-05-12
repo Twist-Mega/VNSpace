@@ -15,7 +15,7 @@ namespace VNSpace
     public partial class AddVNWindow : Window
     {
         /*stores the result of the dialog -- null if cancelled*/
-        public UserEntry? Result { get; private set; }
+        internal UserEntry? Result { get; private set; }
 
         public AddVNWindow()
         {

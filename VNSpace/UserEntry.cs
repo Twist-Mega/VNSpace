@@ -13,7 +13,7 @@ namespace VNSpace
         Dropped,
         Planning
     }
-    class UserEntry
+    internal class UserEntry
     {
         private VisualNovel vn; //visual novel this personal entry applies to
 

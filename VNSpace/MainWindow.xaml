@@ -23,7 +23,7 @@
                 <Button x:Name="categoryViewBtn" Content="Category" Click="CategoryViewBtn_Click" Width="75"
                         Background="#2b2d31" Foreground="#dbdee1" BorderBrush="#1e1f22"/>
             </StackPanel>
-            <Button DockPanel.Dock="Bottom" x:Name="addVNBtn" Content="+ Add VN" 
+            <Button DockPanel.Dock="Bottom" x:Name="addVNBtn" Content="+ Add VN"
                     Click="AddVNBtn_Click" Margin="10" Background="Transparent"
                     BorderBrush="#4e5058" BorderThickness="1" Foreground="#b5bac1"/>
             <ListBox x:Name="vnListBox" SelectionChanged="VnListBox_SelectionChanged"
@@ -40,35 +40,32 @@
             <!-- Top section: cover art + info -->
             <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="15">
                 <!-- Cover art -->
-                <Border Width="100" Height="140" Background="#1e1f22" 
+                <Border Width="100" Height="140" Background="#1e1f22"
                         CornerRadius="6" Margin="0 0 15 0">
                     <Image x:Name="coverArtImage" Stretch="Uniform"/>
                 </Border>
 
                 <!-- Info next to cover art -->
                 <StackPanel VerticalAlignment="Top" Margin="0 5 0 0">
-                    <TextBlock x:Name="titleLabel" FontSize="20" FontWeight="Bold" 
+                    <TextBlock x:Name="titleLabel" FontSize="20" FontWeight="Bold"
                                Foreground="#f2f3f5" TextWrapping="Wrap" MaxWidth="400"/>
-                    <TextBlock x:Name="companyWriterLabel" Foreground="#b5bac1" 
+                    <TextBlock x:Name="companyWriterLabel" Foreground="#b5bac1"
                                Margin="0 4 0 0"/>
-                    <!-- Status and VNDB badges -->
+                    <!-- Status badge and VNDB badge -->
                     <StackPanel Orientation="Horizontal" Margin="0 8 0 0">
                         <Border Background="#1a3a2a" CornerRadius="10" Padding="10 4">
-                            <TextBlock x:Name="statusText" Foreground="#23a55a" FontSize="12"/>
+                            <TextBlock x:Name="statusBadge" Foreground="#23a55a" FontSize="12"/>
                         </Border>
-                        <Border Background="#2a2a4a" CornerRadius="10" 
+                        <Border Background="#2a2a4a" CornerRadius="10"
                                 Padding="10 4" Margin="8 0 0 0"
                                 x:Name="vndbBadge" Visibility="Collapsed">
                             <TextBlock Text="VNDB linked" Foreground="#7289da" FontSize="12"/>
                         </Border>
                     </StackPanel>
-                    <!-- Rating -->
-                    <TextBlock x:Name="ratingLabel" Foreground="#f0a030" 
-                               Margin="0 8 0 0" FontSize="14"/>
                     <!-- Launch button -->
                     <Button x:Name="launchBtn" Content="Launch" Click="LaunchBtn_Click"
                             Margin="0 8 0 0" Width="100" HorizontalAlignment="Left"
-                            Background="#4e5058" Foreground="#f2f3f5" 
+                            Background="#4e5058" Foreground="#f2f3f5"
                             BorderBrush="#4e5058" Visibility="Collapsed"/>
                 </StackPanel>
             </StackPanel>
@@ -82,49 +79,123 @@
 
                 <!-- Metadata left column -->
                 <StackPanel Grid.Column="0">
+
                     <TextBlock Text="VNDB RATING" Foreground="#80848e" FontSize="11"/>
-                    <TextBlock x:Name="vndbRatingLabel" Foreground="#dbdee1" 
+                    <TextBlock x:Name="vndbRatingLabel" Foreground="#dbdee1"
                                Margin="0 2 0 12"/>
 
+                    <!-- Playtime with edit -->
                     <TextBlock Text="PLAYTIME" Foreground="#80848e" FontSize="11"/>
-                    <TextBlock x:Name="playtimeLabel" Foreground="#dbdee1" 
-                               Margin="0 2 0 12"/>
+                    <StackPanel Orientation="Horizontal" Margin="0 2 0 12">
+                        <TextBlock x:Name="playtimeLabel" Foreground="#dbdee1"/>
+                        <TextBox x:Name="playtimeInput" Foreground="#dbdee1" Background="#1e1f22"
+                                 BorderBrush="#4e5058" Padding="2" Width="60"
+                                 Visibility="Collapsed"/>
+                        <Button x:Name="playtimeEditBtn" Content="✏" Click="PlaytimeEditBtn_Click"
+                                Background="Transparent" Foreground="#80848e" BorderThickness="0"
+                                Margin="6 0 0 0"/>
+                        <Button x:Name="playtimeConfirmBtn" Content="✓" Click="PlaytimeConfirmBtn_Click"
+                                Background="Transparent" Foreground="#23a55a" BorderThickness="0"
+                                Margin="4 0 0 0" Visibility="Collapsed"/>
+                    </StackPanel>
 
-                    <!-- Start and finish dates side by side -->
+                    <!-- Rating with edit -->
+                    <TextBlock Text="RATING" Foreground="#80848e" FontSize="11"/>
+                    <StackPanel Orientation="Horizontal" Margin="0 2 0 12">
+                        <TextBlock x:Name="ratingLabel" Foreground="#f0a030"/>
+                        <TextBox x:Name="ratingInput" Foreground="#dbdee1" Background="#1e1f22"
+                                 BorderBrush="#4e5058" Padding="2" Width="60"
+                                 Visibility="Collapsed"/>
+                        <Button x:Name="ratingEditBtn" Content="✏" Click="RatingEditBtn_Click"
+                                Background="Transparent" Foreground="#80848e" BorderThickness="0"
+                                Margin="6 0 0 0"/>
+                        <Button x:Name="ratingConfirmBtn" Content="✓" Click="RatingConfirmBtn_Click"
+                                Background="Transparent" Foreground="#23a55a" BorderThickness="0"
+                                Margin="4 0 0 0" Visibility="Collapsed"/>
+                    </StackPanel>
+
+                    <!-- Start and finish dates with edit -->
                     <StackPanel Orientation="Horizontal" Margin="0 0 0 12">
-                        <StackPanel Margin="0 0 40 0">
+                        <StackPanel Margin="0 0 20 0">
                             <TextBlock Text="STARTED" Foreground="#80848e" FontSize="11"/>
-                            <TextBlock x:Name="startDateLabel" Foreground="#dbdee1" 
-                                       Margin="0 2 0 0"/>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock x:Name="startDateLabel" Foreground="#dbdee1"/>
+                                <TextBox x:Name="startDateInput" Foreground="#dbdee1" Background="#1e1f22"
+                                         BorderBrush="#4e5058" Padding="2" Width="80"
+                                         Visibility="Collapsed"/>
+                                <Button x:Name="startDateEditBtn" Content="✏" Click="StartDateEditBtn_Click"
+                                        Background="Transparent" Foreground="#80848e" BorderThickness="0"
+                                        Margin="6 0 0 0"/>
+                                <Button x:Name="startDateConfirmBtn" Content="✓" Click="StartDateConfirmBtn_Click"
+                                        Background="Transparent" Foreground="#23a55a" BorderThickness="0"
+                                        Margin="4 0 0 0" Visibility="Collapsed"/>
+                            </StackPanel>
                         </StackPanel>
                         <StackPanel>
                             <TextBlock Text="FINISHED" Foreground="#80848e" FontSize="11"/>
-                            <TextBlock x:Name="finishDateLabel" Foreground="#dbdee1" 
-                                       Margin="0 2 0 0"/>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock x:Name="finishDateLabel" Foreground="#dbdee1"/>
+                                <TextBox x:Name="finishDateInput" Foreground="#dbdee1" Background="#1e1f22"
+                                         BorderBrush="#4e5058" Padding="2" Width="80"
+                                         Visibility="Collapsed"/>
+                                <Button x:Name="finishDateEditBtn" Content="✏" Click="FinishDateEditBtn_Click"
+                                        Background="Transparent" Foreground="#80848e" BorderThickness="0"
+                                        Margin="6 0 0 0"/>
+                                <Button x:Name="finishDateConfirmBtn" Content="✓" Click="FinishDateConfirmBtn_Click"
+                                        Background="Transparent" Foreground="#23a55a" BorderThickness="0"
+                                        Margin="4 0 0 0" Visibility="Collapsed"/>
+                            </StackPanel>
                         </StackPanel>
                     </StackPanel>
 
+                    <!-- Category with edit -->
                     <TextBlock Text="CATEGORY" Foreground="#80848e" FontSize="11"/>
-                    <TextBlock x:Name="categoryLabel" Foreground="#dbdee1" 
-                               Margin="0 2 0 12"/>
+                    <StackPanel Orientation="Horizontal" Margin="0 2 0 12">
+                        <TextBlock x:Name="categoryLabel" Foreground="#dbdee1"/>
+                        <TextBox x:Name="categoryInput" Foreground="#dbdee1" Background="#1e1f22"
+                                 BorderBrush="#4e5058" Padding="2" Width="100"
+                                 Visibility="Collapsed"/>
+                        <Button x:Name="categoryEditBtn" Content="✏" Click="CategoryEditBtn_Click"
+                                Background="Transparent" Foreground="#80848e" BorderThickness="0"
+                                Margin="6 0 0 0"/>
+                        <Button x:Name="categoryConfirmBtn" Content="✓" Click="CategoryConfirmBtn_Click"
+                                Background="Transparent" Foreground="#23a55a" BorderThickness="0"
+                                Margin="4 0 0 0" Visibility="Collapsed"/>
+                    </StackPanel>
+
+                    <!-- Status with edit -->
+                    <TextBlock Text="STATUS" Foreground="#80848e" FontSize="11"/>
+                    <StackPanel Orientation="Horizontal" Margin="0 2 0 12">
+                        <TextBlock x:Name="statusText" Foreground="#23a55a"/>
+                        <ComboBox x:Name="statusInput" Visibility="Collapsed"
+                                  Background="#1e1f22" Foreground="#dbdee1"
+                                  BorderBrush="#4e5058"/>
+                        <Button x:Name="statusEditBtn" Content="✏" Click="StatusEditBtn_Click"
+                                Background="Transparent" Foreground="#80848e" BorderThickness="0"
+                                Margin="6 0 0 0"/>
+                        <Button x:Name="statusConfirmBtn" Content="✓" Click="StatusConfirmBtn_Click"
+                                Background="Transparent" Foreground="#23a55a" BorderThickness="0"
+                                Margin="4 0 0 0" Visibility="Collapsed"/>
+                    </StackPanel>
 
                     <TextBlock Text="VOICE ACTORS" Foreground="#80848e" FontSize="11"/>
-                    <TextBlock x:Name="voiceActorsLabel" Foreground="#dbdee1" 
+                    <TextBlock x:Name="voiceActorsLabel" Foreground="#dbdee1"
                                Margin="0 2 0 0" TextWrapping="Wrap"/>
+
                 </StackPanel>
 
                 <!-- Notes right column -->
                 <StackPanel Grid.Column="1" Margin="15 0 0 0">
-                    <TextBlock Text="NOTES" Foreground="#80848e" FontSize="11" 
+                    <TextBlock Text="NOTES" Foreground="#80848e" FontSize="11"
                                Margin="0 0 0 6"/>
                     <TextBox x:Name="notesBox" Height="300" TextWrapping="Wrap"
-                             AcceptsReturn="True" Background="#1e1f22" 
+                             AcceptsReturn="True" Background="#1e1f22"
                              Foreground="#dbdee1" BorderBrush="#1e1f22"
                              Padding="8" VerticalScrollBarVisibility="Auto"
                              CaretBrush="#dbdee1"/>
-                    <Button x:Name="saveNotesBtn" Content="Save Notes" 
+                    <Button x:Name="saveNotesBtn" Content="Save Notes"
                             Click="SaveNotesBtn_Click" Margin="0 6 0 0"
-                            Background="#4e5058" Foreground="#f2f3f5" 
+                            Background="#4e5058" Foreground="#f2f3f5"
                             BorderBrush="#4e5058"/>
                 </StackPanel>
             </Grid>

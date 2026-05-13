@@ -45,6 +45,17 @@
                  BorderBrush="#4e5058" Padding="6" Margin="0 0 0 20"
                  CaretBrush="#dbdee1"/>
 
+        <!-- Cover Image field -->
+        <TextBlock Text="COVER IMAGE (OPTIONAL)" Foreground="#80848e" FontSize="11" Margin="0 0 0 4"/>
+        <StackPanel Orientation="Horizontal" Margin="0 0 0 20">
+            <TextBox x:Name="coverPathInput" Background="#1e1f22" Foreground="#dbdee1"
+             BorderBrush="#4e5058" Padding="6" Width="330" IsReadOnly="True"
+             CaretBrush="#dbdee1"/>
+            <Button x:Name="browseCoverBtn" Content="Browse" Click="BrowseCoverBtn_Click"
+            Background="#4e5058" Foreground="#f2f3f5" BorderBrush="#4e5058"
+            Padding="10 6" Margin="8 0 0 0"/>
+        </StackPanel>
+
         <!-- Confirm and cancel buttons -->
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
             <Button x:Name="cancelBtn" Content="Cancel" Click="CancelBtn_Click"

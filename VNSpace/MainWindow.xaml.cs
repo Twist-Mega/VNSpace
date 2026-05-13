@@ -448,22 +448,28 @@ namespace VNSpace
             launchBtn.Visibility = Visibility.Visible;
         }
 
+        /*exec path confirm -- updates executable path and refreshes UI*/
         private void ExecPathConfirmBtn_Click(object sender, RoutedEventArgs e)
         {
             if (currentEntry == null) return;
-            currentEntry.GetVN().SetExecutablePath(execPathInput.Text.Trim());
-            db.UpdateEntry(currentEntry, currentEntry.GetEntryId());
 
-            /*show launch button if path is set, hide if cleared*/
-            if (!string.IsNullOrEmpty(execPathInput.Text.Trim()))
+            /*get current stored path (set from file dialog in edit button)*/
+            string? path = currentEntry.GetVN().GetExecutablePath();
+
+            /*save to database*/
+            db.UpdateEntry(currentEntry, currentEntry.GetEntryId());
+            db.UpdateVN(currentEntry, currentEntry.GetVnId());
+
+            /*update UI based on whether path exists*/
+            if (!string.IsNullOrEmpty(path))
             {
                 launchBtn.Visibility = Visibility.Visible;
-                ExitEditMode(execPathLabel, execPathInput, execPathEditBtn, execPathConfirmBtn, execPathInput.Text.Trim());
+                execPathLabel.Text = path;
             }
             else
             {
                 launchBtn.Visibility = Visibility.Collapsed;
-                ExitEditMode(execPathLabel, execPathInput, execPathEditBtn, execPathConfirmBtn, "—");
+                execPathLabel.Text = "—";
             }
         }
 

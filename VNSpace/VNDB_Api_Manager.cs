@@ -104,17 +104,26 @@ namespace VNSpace
             }
         }
 
-        /*loads a cover art image from a URL and returns a BitmapImage for WPF display*/
-        public async Task<BitmapImage?> LoadCoverArt(string imageUrl)
+        /*loads a cover art image from a URL or local file path and returns a BitmapImage for WPF display*/
+        public async Task<BitmapImage?> LoadCoverArt(string path)
         {
             try
             {
-                byte[] imageBytes = await client.GetByteArrayAsync(imageUrl);
-
-                /*must be created on UI thread -- caller is responsible for dispatching*/
                 BitmapImage bitmap = new BitmapImage();
                 bitmap.BeginInit();
-                bitmap.StreamSource = new System.IO.MemoryStream(imageBytes);
+
+                /*if path is a web URL, download bytes first*/
+                if (path.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                {
+                    byte[] imageBytes = await client.GetByteArrayAsync(path);
+                    bitmap.StreamSource = new System.IO.MemoryStream(imageBytes);
+                }
+                else
+                {
+                    /*otherwise treat as local file path from file explorer*/
+                    bitmap.UriSource = new Uri(path, UriKind.Absolute);
+                }
+
                 bitmap.CacheOption = BitmapCacheOption.OnLoad;
                 bitmap.EndInit();
                 bitmap.Freeze();

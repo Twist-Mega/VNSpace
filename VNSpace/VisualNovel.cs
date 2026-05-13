@@ -28,6 +28,15 @@ namespace VNSpace
             this.vndbid = id;
         }
 
+        //just cover addition
+        public VisualNovel(string name, string company, string writer, string? coverArt)
+        {
+            this.name = name;
+            this.company = company;
+            this.writer = writer;
+            this.coverArtURL = coverArt;
+        }
+
         //constructor without vndb info
         public VisualNovel(string name, string company, string writer)
         {

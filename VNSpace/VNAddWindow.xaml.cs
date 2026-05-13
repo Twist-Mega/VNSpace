@@ -1,6 +1,7 @@
 ﻿/*Michael Randazzo*/
 /*Interaction logic for VNAddWindow.xaml*/
 
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Windows;
@@ -93,6 +94,23 @@ namespace VNSpace
             searchStatusLabel.Text = $"Selected: {selected.Title} ({selected.VndbId})";
         }
 
+
+
+        /*browse button -- opens file explorer to select a local image cover*/
+        private void BrowseCoverBtn_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+
+            /*filter for standard image formats*/
+            openFileDialog.Filter = "Image files (*.png;*.jpeg;*.jpg)|*.png;*.jpeg;*.jpg|All files (*.*)|*.*";
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                /*set the path text box to the selected file*/
+                coverPathInput.Text = openFileDialog.FileName;
+            }
+        }
+
         /*confirm button -- validates input and creates new UserEntry*/
         private void ConfirmBtn_Click(object sender, RoutedEventArgs e)
         {
@@ -109,12 +127,15 @@ namespace VNSpace
             string writer = string.IsNullOrWhiteSpace(writerInput.Text) ? "Unknown" : writerInput.Text.Trim();
             string? vndbId = string.IsNullOrWhiteSpace(vndbIdInput.Text) ? null : vndbIdInput.Text.Trim();
 
+            /*get custom cover path if selected*/
+            string? coverPath = string.IsNullOrWhiteSpace(coverPathInput.Text) ? null : coverPathInput.Text.Trim();
+
             /*construct VisualNovel and UserEntry from inputs*/
             VisualNovel vn;
             if (vndbId != null)
-                vn = new VisualNovel(title, company, writer, null, vndbId);
+                vn = new VisualNovel(title, company, writer, coverPath, vndbId);
             else
-                vn = new VisualNovel(title, company, writer);
+                vn = new VisualNovel(title, company, writer, coverPath);
 
             Result = new UserEntry(vn, statusLabel.Planning);
 

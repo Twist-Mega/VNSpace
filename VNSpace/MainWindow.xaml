@@ -24,8 +24,8 @@
                         Background="#2b2d31" Foreground="#dbdee1" BorderBrush="#1e1f22"/>
             </StackPanel>
             <Button DockPanel.Dock="Bottom" x:Name="resetBtn" Content="Reset Data"
-        Click="ResetBtn_Click" Margin="10 0 10 4" Background="Transparent"
-        BorderBrush="#da373c" BorderThickness="1" Foreground="#da373c"/>
+                    Click="ResetBtn_Click" Margin="10 0 10 4" Background="Transparent"
+                    BorderBrush="#da373c" BorderThickness="1" Foreground="#da373c"/>
             <Button DockPanel.Dock="Bottom" x:Name="addVNBtn" Content="+ Add VN"
                     Click="AddVNBtn_Click" Margin="10" Background="Transparent"
                     BorderBrush="#4e5058" BorderThickness="1" Foreground="#b5bac1"/>
@@ -65,20 +65,18 @@
                             <TextBlock Text="VNDB linked" Foreground="#7289da" FontSize="12"/>
                         </Border>
                     </StackPanel>
-                    <Button x:Name="fetchVNDBBtn" Content="Fetch VNDB Data" Click="FetchVNDBBtn_Click"
-        Margin="0 8 0 0" HorizontalAlignment="Left"
-        Background="#7289da" Foreground="#f2f3f5"
-        BorderBrush="#7289da" Padding="10 4"/>
-                    <!-- Launch button -->
-                    <Button x:Name="launchBtn" Content="Launch" Click="LaunchBtn_Click"
-                            Margin="0 8 0 0" Width="100" HorizontalAlignment="Left"
-                            Background="#4e5058" Foreground="#f2f3f5"
-                            BorderBrush="#4e5058" Visibility="Collapsed"/>
-                    <!-- Delete entry button -->
-                    <Button x:Name="deleteEntryBtn" Content="Delete Entry" Click="DeleteEntryBtn_Click"
-        Margin="0 8 0 0" Width="100" HorizontalAlignment="Left"
-        Background="Transparent" Foreground="#da373c"
-        BorderBrush="#da373c" BorderThickness="1" Visibility="Collapsed"/>
+                    <!-- Action buttons row -->
+                    <StackPanel Orientation="Horizontal" Margin="0 8 0 0">
+                        <Button x:Name="fetchVNDBBtn" Content="Fetch VNDB Data" Click="FetchVNDBBtn_Click"
+                                Background="#7289da" Foreground="#f2f3f5"
+                                BorderBrush="#7289da" Padding="10 4"/>
+                        <Button x:Name="launchBtn" Content="Launch" Click="LaunchBtn_Click"
+                                Margin="8 0 0 0" Background="#4e5058" Foreground="#f2f3f5"
+                                BorderBrush="#4e5058" Padding="10 4" Visibility="Collapsed"/>
+                        <Button x:Name="deleteEntryBtn" Content="Delete Entry" Click="DeleteEntryBtn_Click"
+                                Margin="8 0 0 0" Background="Transparent" Foreground="#da373c"
+                                BorderBrush="#da373c" BorderThickness="1" Padding="10 4" Visibility="Collapsed"/>
+                    </StackPanel>
                 </StackPanel>
             </StackPanel>
 
@@ -93,41 +91,48 @@
                 <StackPanel Grid.Column="0">
 
                     <TextBlock Text="VNDB RATING" Foreground="#80848e" FontSize="11"/>
-                    <TextBlock x:Name="vndbRatingLabel" Foreground="#dbdee1"
-                               Margin="0 2 0 12"/>
+                    <TextBlock x:Name="vndbRatingLabel" Foreground="#dbdee1" Margin="0 2 0 10"/>
 
-                    <!-- Playtime with edit -->
-                    <TextBlock Text="PLAYTIME" Foreground="#80848e" FontSize="11"/>
-                    <StackPanel Orientation="Horizontal" Margin="0 2 0 12">
-                        <TextBlock x:Name="playtimeLabel" Foreground="#dbdee1"/>
-                        <TextBox x:Name="playtimeInput" Foreground="#dbdee1" Background="#1e1f22"
-                                 BorderBrush="#4e5058" Padding="2" Width="60"
-                                 Visibility="Collapsed"/>
-                        <Button x:Name="playtimeEditBtn" Content="✏" Click="PlaytimeEditBtn_Click"
-                                Background="Transparent" Foreground="#80848e" BorderThickness="0"
-                                Margin="6 0 0 0"/>
-                        <Button x:Name="playtimeConfirmBtn" Content="✓" Click="PlaytimeConfirmBtn_Click"
-                                Background="Transparent" Foreground="#23a55a" BorderThickness="0"
-                                Margin="4 0 0 0" Visibility="Collapsed"/>
-                    </StackPanel>
+                    <!-- Playtime and rating side by side -->
+                    <Grid Margin="0 0 0 10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="PLAYTIME" Foreground="#80848e" FontSize="11"/>
+                            <StackPanel Orientation="Horizontal" Margin="0 2 0 0">
+                                <TextBlock x:Name="playtimeLabel" Foreground="#dbdee1"/>
+                                <TextBox x:Name="playtimeInput" Foreground="#dbdee1" Background="#1e1f22"
+                                         BorderBrush="#4e5058" Padding="2" Width="60"
+                                         Visibility="Collapsed"/>
+                                <Button x:Name="playtimeEditBtn" Content="✏" Click="PlaytimeEditBtn_Click"
+                                        Background="Transparent" Foreground="#80848e" BorderThickness="0"
+                                        Margin="6 0 0 0"/>
+                                <Button x:Name="playtimeConfirmBtn" Content="✓" Click="PlaytimeConfirmBtn_Click"
+                                        Background="Transparent" Foreground="#23a55a" BorderThickness="0"
+                                        Margin="4 0 0 0" Visibility="Collapsed"/>
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="RATING" Foreground="#80848e" FontSize="11"/>
+                            <StackPanel Orientation="Horizontal" Margin="0 2 0 0">
+                                <TextBlock x:Name="ratingLabel" Foreground="#f0a030"/>
+                                <TextBox x:Name="ratingInput" Foreground="#dbdee1" Background="#1e1f22"
+                                         BorderBrush="#4e5058" Padding="2" Width="60"
+                                         Visibility="Collapsed"/>
+                                <Button x:Name="ratingEditBtn" Content="✏" Click="RatingEditBtn_Click"
+                                        Background="Transparent" Foreground="#80848e" BorderThickness="0"
+                                        Margin="6 0 0 0"/>
+                                <Button x:Name="ratingConfirmBtn" Content="✓" Click="RatingConfirmBtn_Click"
+                                        Background="Transparent" Foreground="#23a55a" BorderThickness="0"
+                                        Margin="4 0 0 0" Visibility="Collapsed"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
 
-                    <!-- Rating with edit -->
-                    <TextBlock Text="RATING" Foreground="#80848e" FontSize="11"/>
-                    <StackPanel Orientation="Horizontal" Margin="0 2 0 12">
-                        <TextBlock x:Name="ratingLabel" Foreground="#f0a030"/>
-                        <TextBox x:Name="ratingInput" Foreground="#dbdee1" Background="#1e1f22"
-                                 BorderBrush="#4e5058" Padding="2" Width="60"
-                                 Visibility="Collapsed"/>
-                        <Button x:Name="ratingEditBtn" Content="✏" Click="RatingEditBtn_Click"
-                                Background="Transparent" Foreground="#80848e" BorderThickness="0"
-                                Margin="6 0 0 0"/>
-                        <Button x:Name="ratingConfirmBtn" Content="✓" Click="RatingConfirmBtn_Click"
-                                Background="Transparent" Foreground="#23a55a" BorderThickness="0"
-                                Margin="4 0 0 0" Visibility="Collapsed"/>
-                    </StackPanel>
-
-                    <!-- Start and finish dates with edit -->
-                    <StackPanel Orientation="Horizontal" Margin="0 0 0 12">
+                    <!-- Start and finish dates side by side -->
+                    <StackPanel Orientation="Horizontal" Margin="0 0 0 10">
                         <StackPanel Margin="0 0 20 0">
                             <TextBlock Text="STARTED" Foreground="#80848e" FontSize="11"/>
                             <StackPanel Orientation="Horizontal">
@@ -160,55 +165,66 @@
                         </StackPanel>
                     </StackPanel>
 
-                    <!-- Category with edit -->
-                    <TextBlock Text="CATEGORY" Foreground="#80848e" FontSize="11"/>
-                    <StackPanel Orientation="Horizontal" Margin="0 2 0 12">
-                        <TextBlock x:Name="categoryLabel" Foreground="#dbdee1"/>
-                        <TextBox x:Name="categoryInput" Foreground="#dbdee1" Background="#1e1f22"
-                                 BorderBrush="#4e5058" Padding="2" Width="100"
-                                 Visibility="Collapsed"/>
-                        <Button x:Name="categoryEditBtn" Content="✏" Click="CategoryEditBtn_Click"
-                                Background="Transparent" Foreground="#80848e" BorderThickness="0"
-                                Margin="6 0 0 0"/>
-                        <Button x:Name="categoryConfirmBtn" Content="✓" Click="CategoryConfirmBtn_Click"
-                                Background="Transparent" Foreground="#23a55a" BorderThickness="0"
-                                Margin="4 0 0 0" Visibility="Collapsed"/>
-                    </StackPanel>
+                    <!-- Category and status side by side -->
+                    <Grid Margin="0 0 0 10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="CATEGORY" Foreground="#80848e" FontSize="11"/>
+                            <StackPanel Orientation="Horizontal" Margin="0 2 0 0">
+                                <TextBlock x:Name="categoryLabel" Foreground="#dbdee1"/>
+                                <TextBox x:Name="categoryInput" Foreground="#dbdee1" Background="#1e1f22"
+                                         BorderBrush="#4e5058" Padding="2" Width="80"
+                                         Visibility="Collapsed"/>
+                                <Button x:Name="categoryEditBtn" Content="✏" Click="CategoryEditBtn_Click"
+                                        Background="Transparent" Foreground="#80848e" BorderThickness="0"
+                                        Margin="6 0 0 0"/>
+                                <Button x:Name="categoryConfirmBtn" Content="✓" Click="CategoryConfirmBtn_Click"
+                                        Background="Transparent" Foreground="#23a55a" BorderThickness="0"
+                                        Margin="4 0 0 0" Visibility="Collapsed"/>
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="STATUS" Foreground="#80848e" FontSize="11"/>
+                            <StackPanel Orientation="Horizontal" Margin="0 2 0 0">
+                                <TextBlock x:Name="statusText" Foreground="#23a55a"/>
+                                <ComboBox x:Name="statusInput" Visibility="Collapsed"
+                                          Background="#1e1f22" Foreground="#dbdee1"
+                                          BorderBrush="#4e5058"/>
+                                <Button x:Name="statusEditBtn" Content="✏" Click="StatusEditBtn_Click"
+                                        Background="Transparent" Foreground="#80848e" BorderThickness="0"
+                                        Margin="6 0 0 0"/>
+                                <Button x:Name="statusConfirmBtn" Content="✓" Click="StatusConfirmBtn_Click"
+                                        Background="Transparent" Foreground="#23a55a" BorderThickness="0"
+                                        Margin="4 0 0 0" Visibility="Collapsed"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Grid>
 
-                    <!-- Status with edit -->
-                    <TextBlock Text="STATUS" Foreground="#80848e" FontSize="11"/>
-                    <StackPanel Orientation="Horizontal" Margin="0 2 0 12">
-                        <TextBlock x:Name="statusText" Foreground="#23a55a"/>
-                        <ComboBox x:Name="statusInput" Visibility="Collapsed"
-                                  Background="#1e1f22" Foreground="#dbdee1"
-                                  BorderBrush="#4e5058"/>
-                        <Button x:Name="statusEditBtn" Content="✏" Click="StatusEditBtn_Click"
-                                Background="Transparent" Foreground="#80848e" BorderThickness="0"
-                                Margin="6 0 0 0"/>
-                        <Button x:Name="statusConfirmBtn" Content="✓" Click="StatusConfirmBtn_Click"
-                                Background="Transparent" Foreground="#23a55a" BorderThickness="0"
-                                Margin="4 0 0 0" Visibility="Collapsed"/>
-                    </StackPanel>
-
-                    <!-- Executable path with edit -->
-                    <TextBlock Text="EXECUTABLE" Foreground="#80848e" FontSize="11"/>
-                    <StackPanel Orientation="Horizontal" Margin="0 2 0 12">
-                        <TextBlock x:Name="execPathLabel" Foreground="#dbdee1" 
-               TextTrimming="CharacterEllipsis" MaxWidth="200"/>
-                        <TextBox x:Name="execPathInput" Foreground="#dbdee1" Background="#1e1f22"
-             BorderBrush="#4e5058" Padding="2" Width="150"
-             Visibility="Collapsed"/>
-                        <Button x:Name="execPathEditBtn" Content="✏" Click="ExecPathEditBtn_Click"
-            Background="Transparent" Foreground="#80848e" BorderThickness="0"
-            Margin="6 0 0 0"/>
-                        <Button x:Name="execPathConfirmBtn" Content="✓" Click="ExecPathConfirmBtn_Click"
-            Background="Transparent" Foreground="#23a55a" BorderThickness="0"
-            Margin="4 0 0 0" Visibility="Collapsed"/>
-                    </StackPanel>
-
-                    <TextBlock Text="VOICE ACTORS" Foreground="#80848e" FontSize="11"/>
-                    <TextBlock x:Name="voiceActorsLabel" Foreground="#dbdee1"
-                               Margin="0 2 0 0" TextWrapping="Wrap"/>
+                    <!-- Executable and voice actors side by side -->
+                    <Grid Margin="0 0 0 0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="EXECUTABLE" Foreground="#80848e" FontSize="11"/>
+                            <StackPanel Orientation="Horizontal" Margin="0 2 0 0">
+                                <TextBlock x:Name="execPathLabel" Foreground="#dbdee1"
+                                           TextTrimming="CharacterEllipsis" MaxWidth="120"/>
+                                <Button x:Name="execPathEditBtn" Content="✏" Click="ExecPathEditBtn_Click"
+                                        Background="Transparent" Foreground="#80848e" BorderThickness="0"
+                                        Margin="6 0 0 0"/>
+                            </StackPanel>
+                        </StackPanel>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="VOICE ACTORS" Foreground="#80848e" FontSize="11"/>
+                            <TextBlock x:Name="voiceActorsLabel" Foreground="#dbdee1"
+                                       Margin="0 2 0 0" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Grid>
 
                 </StackPanel>
 

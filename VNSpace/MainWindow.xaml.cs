@@ -39,22 +39,8 @@ namespace VNSpace
             {
                 library.GetAllEntries().Add(entry);
             }
-            library.AddVN("Steins;Gate", "5pb.", "Hayashi Naotaka");
-            library.GetAllEntries().Last().SetStatus(statusLabel.Playing);
-            library.GetAllEntries().Last().SetCategory("Sci-Fi");
-
-            library.AddVN("Clannad", "Key", "Maeda Jun");
-            library.GetAllEntries().Last().SetStatus(statusLabel.Finished);
-            library.GetAllEntries().Last().SetCategory("Romance");
-
-            library.AddVN("Muv-Luv", "âge", "Yoshimune Kouki");
-            library.GetAllEntries().Last().SetStatus(statusLabel.Planning);
-            library.GetAllEntries().Last().SetCategory("Sci-Fi");
-
 
             ShowTitleView();
-
-
         }
 
         /*shows flat list of all VNs sorted by title*/
@@ -161,7 +147,7 @@ namespace VNSpace
         }
 
         /*selection changed -- handles both group selection and VN selection*/
-        private void VnListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void VnListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (vnListBox.SelectedItem == null) return;
 
@@ -185,6 +171,7 @@ namespace VNSpace
             titleLabel.Text = selected.GetVN().GetName();
             companyWriterLabel.Text = $"{selected.GetVN().GetCompany()} · {selected.GetVN().GetWriter()}";
             statusText.Text = selected.GetStatusLabel();
+            statusBadge.Text = selected.GetStatusLabel();
             ratingLabel.Text = selected.GetRating().HasValue ? $"{selected.GetRating()}/10" : "Unrated";
             playtimeLabel.Text = selected.GetPlayTime().HasValue ? $"{selected.GetPlayTime()} hrs" : "—";
             startDateLabel.Text = selected.GetStartDate().HasValue ? selected.GetStartDate().ToString() : "—";
@@ -200,6 +187,15 @@ namespace VNSpace
             launchBtn.Visibility = string.IsNullOrEmpty(currentEntry.GetVN().GetExecutablePath())
                                    ? Visibility.Collapsed
                                    : Visibility.Visible;
+
+            /*load cover art from stored URL if available*/
+            coverArtImage.Source = null;
+            if (!string.IsNullOrEmpty(selected.GetVN().GetCoverArtURL()))
+            {
+                BitmapImage? art = await vndb.LoadCoverArt(selected.GetVN().GetCoverArtURL()!);
+                if (art != null)
+                    coverArtImage.Source = art;
+            }
         }
 
         /*save notes button -- persists notes to database*/
@@ -225,12 +221,17 @@ namespace VNSpace
             /*only add entry if user confirmed*/
             if (result == true && dialog.Result != null)
             {
-                /*add to library in memory*/
-                library.GetAllEntries().Add(dialog.Result);
+                /*save to database -- returns Entry_Id*/
+                long newEntryId = db.SaveEntry(dialog.Result);
+                dialog.Result.SetEntryId(newEntryId);
 
-                /*save to database and store returned Entry_Id*/
-                long newId = db.SaveEntry(dialog.Result);
-                dialog.Result.SetEntryId(newId);
+                /*SaveEntry inserts the VN row first, so VN_Id is Entry_Id - 1 is not reliable*/
+                /*instead we reload the last inserted VN_Id from a quick query*/
+                long newVnId = db.GetLastVnId();
+                dialog.Result.SetVnId(newVnId);
+
+                /*add to library in memory after IDs are assigned*/
+                library.GetAllEntries().Add(dialog.Result);
 
                 /*refresh current view*/
                 if (currentView == "title")
@@ -396,6 +397,7 @@ namespace VNSpace
             }
 
             statusText.Text = currentEntry.GetStatusLabel();
+            statusBadge.Text = currentEntry.GetStatusLabel();
             statusText.Visibility = Visibility.Visible;
             statusInput.Visibility = Visibility.Collapsed;
             statusEditBtn.Visibility = Visibility.Visible;
@@ -516,8 +518,8 @@ namespace VNSpace
             voiceActorsLabel.Text = currentEntry.GetVN().GetVoiceActors() ?? "—";
             vndbBadge.Visibility = Visibility.Visible;
 
-            /*save updated VN data to database*/
             db.UpdateEntry(currentEntry, currentEntry.GetEntryId());
+            db.UpdateVN(currentEntry, currentEntry.GetVnId());
 
             MessageBox.Show("VNDB data fetched successfully!", "Success");
         }

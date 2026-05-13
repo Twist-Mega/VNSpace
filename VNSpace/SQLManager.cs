@@ -1,4 +1,7 @@
-﻿using Microsoft.Data.Sqlite;
+﻿/*Michael Randazzo*/
+/*Handles all database read/write operations*/
+
+using Microsoft.Data.Sqlite;
 using System;
 using System.Collections.Generic;
 
@@ -70,7 +73,7 @@ namespace VNSpace
 
                 /*insert VN data into VISUAL_NOVELS*/
                 string insertVN = @"
-                    INSERT INTO VISUAL_NOVELS (Name, Company, Writer, CoverArtURL, VNDB_Id, AltName, AvgRating, VoteCount)
+                    INSERT INTO VISUAL_NOVELS (Name, Company, Writer, CoverArtURL, VNDB_Id, AltName, AvgRating, VoteCount, ExecPath)
                     VALUES (@name, @company, @writer, @coverArt, @vndbId, @altName, @avgRating, @voteCount, @execPath)";
 
                 SqliteCommand vnCmd = new SqliteCommand(insertVN, connection);
@@ -82,14 +85,11 @@ namespace VNSpace
                 vnCmd.Parameters.AddWithValue("@altName", entry.GetVN().GetAltName() ?? "");
                 vnCmd.Parameters.AddWithValue("@avgRating", entry.GetVN().GetAverageRating() ?? (object)DBNull.Value);
                 vnCmd.Parameters.AddWithValue("@voteCount", entry.GetVN().GetVoteCount() ?? (object)DBNull.Value);
+                vnCmd.Parameters.AddWithValue("@execPath", entry.GetVN().GetExecutablePath() ?? "");
                 vnCmd.ExecuteNonQuery();
 
                 /*get the ID of the VN just inserted*/
-                string getIdQuery = "SELECT last_insert_rowid();";
-
-                SqliteCommand idCmd = new SqliteCommand(getIdQuery, connection);
-
-                long vnId = (long)idCmd.ExecuteScalar()!;
+                long vnId = (long)new SqliteCommand("SELECT last_insert_rowid();", connection).ExecuteScalar()!;
 
                 /*insert personal user data into USER_ENTRIES, linked to the VN above*/
                 string insertEntry = @"
@@ -143,6 +143,39 @@ namespace VNSpace
             }
         }
 
+        /*updates the VISUAL_NOVELS row for an entry -- used after fetching VNDB data*/
+        public void UpdateVN(UserEntry entry, long vnId)
+        {
+            using (SqliteConnection connection = new SqliteConnection($"Data Source={dbPath}"))
+            {
+                connection.Open();
+
+                string updateVN = @"
+                    UPDATE VISUAL_NOVELS
+                    SET Company     = @company,
+                        Writer      = @writer,
+                        CoverArtURL = @coverArt,
+                        VNDB_Id     = @vndbId,
+                        AltName     = @altName,
+                        AvgRating   = @avgRating,
+                        VoteCount   = @voteCount,
+                        ExecPath    = @execPath
+                    WHERE VN_Id = @vnId";
+
+                SqliteCommand cmd = new SqliteCommand(updateVN, connection);
+                cmd.Parameters.AddWithValue("@company", entry.GetVN().GetCompany());
+                cmd.Parameters.AddWithValue("@writer", entry.GetVN().GetWriter());
+                cmd.Parameters.AddWithValue("@coverArt", entry.GetVN().GetCoverArtURL() ?? "");
+                cmd.Parameters.AddWithValue("@vndbId", entry.GetVN().GetVNDBID() ?? "");
+                cmd.Parameters.AddWithValue("@altName", entry.GetVN().GetAltName() ?? "");
+                cmd.Parameters.AddWithValue("@avgRating", entry.GetVN().GetAverageRating() ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@voteCount", entry.GetVN().GetVoteCount() ?? (object)DBNull.Value);
+                cmd.Parameters.AddWithValue("@execPath", entry.GetVN().GetExecutablePath() ?? "");
+                cmd.Parameters.AddWithValue("@vnId", vnId);
+                cmd.ExecuteNonQuery();
+            }
+        }
+
         /*removes a VN entry and its associated user entry from the database*/
         public void DeleteEntry(long vnId)
         {
@@ -175,9 +208,9 @@ namespace VNSpace
 
                 /*join VISUAL_NOVELS and USER_ENTRIES to reconstruct full UserEntry objects*/
                 string query = @"
-                    SELECT V.Name, V.Company, V.Writer, V.CoverArtURL, V.VNDB_Id,
-                           V.AltName, V.AvgRating, V.VoteCount,
-                           E.Rating, E.Notes, E.PlayTime, E.StartDate, E.FinishDate,
+                    SELECT V.VN_Id, V.Name, V.Company, V.Writer, V.CoverArtURL, V.VNDB_Id,
+                           V.AltName, V.AvgRating, V.VoteCount, V.ExecPath,
+                           E.Entry_Id, E.Rating, E.Notes, E.PlayTime, E.StartDate, E.FinishDate,
                            E.Category, E.Status
                     FROM   USER_ENTRIES  AS E
                     JOIN   VISUAL_NOVELS AS V ON E.VN_Id = V.VN_Id";
@@ -205,9 +238,21 @@ namespace VNSpace
                     if (int.TryParse(reader["VoteCount"].ToString(), out int voteCount))
                         vn.SetVoteCount(voteCount);
 
+                    /*load executable path from database so it is available on startup*/
+                    if (!string.IsNullOrEmpty(reader["ExecPath"].ToString()))
+                        vn.SetExecutablePath(reader["ExecPath"].ToString()!);
+
                     /*reconstruct UserEntry object -- parse status enum from stored string*/
                     statusLabel status = Enum.Parse<statusLabel>(reader["Status"].ToString()!);
                     UserEntry entry = new UserEntry(vn, status);
+
+                    /*assign Entry_Id so UpdateEntry and DeleteEntry work correctly after load*/
+                    if (long.TryParse(reader["Entry_Id"].ToString(), out long entryId))
+                        entry.SetEntryId(entryId);
+
+                    /*store VN_Id on the entry so UpdateVN can target the correct row*/
+                    if (long.TryParse(reader["VN_Id"].ToString(), out long vnId))
+                        entry.SetVnId(vnId);
 
                     /*set optional user entry fields if present*/
                     if (float.TryParse(reader["Rating"].ToString(), out float rating))
@@ -228,14 +273,22 @@ namespace VNSpace
                     if (DateTime.TryParse(reader["FinishDate"].ToString(), out DateTime finishDate))
                         entry.SetFinishDate(finishDate);
 
-                    if (!string.IsNullOrEmpty(reader["ExecPath"].ToString()))
-                        vn.SetExecutablePath(reader["ExecPath"].ToString()!);
-
                     entries.Add(entry);
                 }
             }
 
             return entries;
+        }
+
+        /*returns the VN_Id of the most recently inserted VISUAL_NOVELS row*/
+        /*used by MainWindow after SaveEntry so the entry can store its VN_Id for UpdateVN*/
+        public long GetLastVnId()
+        {
+            using (SqliteConnection connection = new SqliteConnection($"Data Source={dbPath}"))
+            {
+                connection.Open();
+                return (long)new SqliteCommand("SELECT MAX(VN_Id) FROM VISUAL_NOVELS;", connection).ExecuteScalar()!;
+            }
         }
 
         /*deletes all entries from both tables -- used to reset app to clean slate*/

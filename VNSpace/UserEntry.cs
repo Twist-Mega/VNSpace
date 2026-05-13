@@ -1,4 +1,7 @@
-﻿using System;
+﻿/*Michael Randazzo*/
+/*Represents a user's personal log entry for a visual novel*/
+
+using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using System.Text;
@@ -50,12 +53,12 @@ namespace VNSpace
 
         public void SetPlayTime(float playTime)
         {
-            this.playTime = playTime; 
+            this.playTime = playTime;
         }
 
         public void SetStartDate(DateTime start)
         {
-            this.startDate = start; 
+            this.startDate = start;
         }
 
         public void SetFinishDate(DateTime finish)
@@ -160,6 +163,20 @@ namespace VNSpace
         public void SetEntryId(long id)
         {
             this.entryId = id;
+        }
+
+        /*database ID for the linked VISUAL_NOVELS row -- needed so UpdateVN targets the right row*/
+        private long vnId = -1;
+
+        /*get and set for database VN ID*/
+        public long GetVnId()
+        {
+            return this.vnId;
+        }
+
+        public void SetVnId(long id)
+        {
+            this.vnId = id;
         }
     }
 }

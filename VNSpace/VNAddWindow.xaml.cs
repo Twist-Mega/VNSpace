@@ -1,14 +1,10 @@
-﻿using System;
+﻿/*Michael Randazzo*/
+/*Interaction logic for VNAddWindow.xaml*/
+
+using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace VNSpace
 {
@@ -17,9 +13,84 @@ namespace VNSpace
         /*stores the result of the dialog -- null if cancelled*/
         internal UserEntry? Result { get; private set; }
 
+        /*VNDB service -- handles search calls*/
+        private VNDBI_Api_Manager vndb = new VNDBI_Api_Manager();
+
+        /*holds the current list of search results -- indexed alongside searchResultsList*/
+        private List<VNDBResult> currentSearchResults = new List<VNDBResult>();
+
         public AddVNWindow()
         {
             InitializeComponent();
+        }
+
+        /*search VNDB button -- searches by whatever is in the title field*/
+        private async void SearchVNDBBtn_Click(object sender, RoutedEventArgs e)
+        {
+            string query = titleInput.Text.Trim();
+
+            /*require at least something to search*/
+            if (string.IsNullOrEmpty(query))
+            {
+                titleInput.BorderBrush = System.Windows.Media.Brushes.Red;
+                return;
+            }
+
+            /*show loading state and hide any previous results*/
+            searchVNDBBtn.IsEnabled = false;
+            searchResultsList.Visibility = Visibility.Collapsed;
+            searchStatusLabel.Text = "Searching VNDB...";
+            searchStatusLabel.Visibility = Visibility.Visible;
+
+            /*check API is reachable before searching*/
+            bool reachable = await vndb.IsApiReachable();
+            if (!reachable)
+            {
+                searchStatusLabel.Text = "VNDB is unreachable. Check your connection and try again.";
+                searchVNDBBtn.IsEnabled = true;
+                return;
+            }
+
+            /*run the search*/
+            List<VNDBResult> results = await vndb.SearchByTitle(query);
+
+            searchVNDBBtn.IsEnabled = true;
+
+            /*handle no results*/
+            if (results.Count == 0)
+            {
+                searchStatusLabel.Text = "No results found.";
+                return;
+            }
+
+            /*populate results list -- store results so SelectionChanged can access them*/
+            currentSearchResults = results;
+            searchResultsList.ItemsSource = null;
+            searchResultsList.ItemsSource = currentSearchResults;
+
+            searchStatusLabel.Text = $"{results.Count} results — click one to fill in the details";
+            searchResultsList.Visibility = Visibility.Visible;
+        }
+
+        /*selection changed -- auto-fills fields when user picks a search result*/
+        private void SearchResultsList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (searchResultsList.SelectedIndex < 0) return;
+
+            VNDBResult selected = currentSearchResults[searchResultsList.SelectedIndex];
+
+            /*fill title -- prefer alttitle (original script) if available, otherwise use main title*/
+            titleInput.Text = selected.Title;
+
+            /*fill company if the result has a developer*/
+            if (!string.IsNullOrEmpty(selected.Developer))
+                companyInput.Text = selected.Developer;
+
+            /*fill VNDB ID*/
+            vndbIdInput.Text = selected.VndbId;
+
+            /*update status label to confirm selection*/
+            searchStatusLabel.Text = $"Selected: {selected.Title} ({selected.VndbId})";
         }
 
         /*confirm button -- validates input and creates new UserEntry*/

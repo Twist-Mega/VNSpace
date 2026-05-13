@@ -1,4 +1,7 @@
-﻿using System;
+﻿/*Michael Randazzo*/
+/*Handles all communication with the VNDB Kana API*/
+
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
@@ -25,6 +28,11 @@ namespace VNSpace
             "va.staff.name, va.character.name, " +
             "description, released, languages, platforms";
 
+        /*fields to request for search results -- lighter than full fetch*/
+        /*additional tags so flagged thumbnails can be filtered out*/
+        private const string SEARCH_FIELDS =
+            "title, alttitle, image.thumbnail, image.sexual, image.violence, developers.name, released";
+
         /*searches VNDB for VNs matching a title string -- returns list of results*/
         public async Task<List<VNDBResult>> SearchByTitle(string title)
         {
@@ -36,7 +44,7 @@ namespace VNSpace
                 string query = JsonSerializer.Serialize(new
                 {
                     filters = new object[] { "search", "=", title },
-                    fields = "title, alttitle, image.thumbnail, developers.name, released",
+                    fields = SEARCH_FIELDS,
                     sort = "searchrank",
                     results = 10
                 });
@@ -160,11 +168,17 @@ namespace VNSpace
             if (vn.TryGetProperty("developers", out JsonElement devs) && devs.GetArrayLength() > 0)
                 result.Developer = devs[0].GetProperty("name").GetString();
 
-            /*get thumbnail URL if image is present and not flagged*/
+            /*check flags before storing thumbnail -- same threshold as FetchById*/
             if (vn.TryGetProperty("image", out JsonElement img) && img.ValueKind != JsonValueKind.Null)
             {
-                if (img.TryGetProperty("thumbnail", out JsonElement thumb) && thumb.ValueKind != JsonValueKind.Null)
-                    result.ThumbnailUrl = thumb.GetString();
+                float sexual = img.TryGetProperty("sexual", out JsonElement s) ? s.GetSingle() : 0;
+                float violence = img.TryGetProperty("violence", out JsonElement v) ? v.GetSingle() : 0;
+
+                if (sexual < 1.0f && violence < 1.0f)
+                {
+                    if (img.TryGetProperty("thumbnail", out JsonElement thumb) && thumb.ValueKind != JsonValueKind.Null)
+                        result.ThumbnailUrl = thumb.GetString();
+                }
             }
 
             return result;

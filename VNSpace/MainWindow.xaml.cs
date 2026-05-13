@@ -187,6 +187,7 @@ namespace VNSpace
             launchBtn.Visibility = string.IsNullOrEmpty(currentEntry.GetVN().GetExecutablePath())
                                    ? Visibility.Collapsed
                                    : Visibility.Visible;
+            deleteEntryBtn.Visibility = Visibility.Visible;
 
             /*load cover art from stored URL if available*/
             coverArtImage.Source = null;
@@ -428,8 +429,23 @@ namespace VNSpace
         private void ExecPathEditBtn_Click(object sender, RoutedEventArgs e)
         {
             if (currentEntry == null) return;
-            string current = currentEntry.GetVN().GetExecutablePath() ?? "";
-            EnterEditMode(execPathLabel, execPathInput, execPathEditBtn, execPathConfirmBtn, current);
+
+            Microsoft.Win32.OpenFileDialog dialog = new Microsoft.Win32.OpenFileDialog();
+            dialog.Title = "Select Executable";
+            dialog.Filter = "Executable files (*.exe)|*.exe|All files (*.*)|*.*";
+
+            string? current = currentEntry.GetVN().GetExecutablePath();
+            if (!string.IsNullOrEmpty(current))
+                dialog.InitialDirectory = System.IO.Path.GetDirectoryName(current);
+
+            bool? result = dialog.ShowDialog();
+            if (result != true) return;
+
+            currentEntry.GetVN().SetExecutablePath(dialog.FileName);
+            db.UpdateEntry(currentEntry, currentEntry.GetEntryId());
+            db.UpdateVN(currentEntry, currentEntry.GetVnId());
+            execPathLabel.Text = dialog.FileName;
+            launchBtn.Visibility = Visibility.Visible;
         }
 
         private void ExecPathConfirmBtn_Click(object sender, RoutedEventArgs e)
@@ -470,6 +486,34 @@ namespace VNSpace
             {
                 MessageBox.Show($"Could not launch VN: {ex.Message}", "Launch Error",
                     MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        /*delete entry button -- removes selected entry from database and library*/
+        private void DeleteEntryBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentEntry == null) return;
+
+            MessageBoxResult confirm = MessageBox.Show(
+                $"Are you sure you want to delete {currentEntry.GetVN().GetName()}? This cannot be undone.",
+                "Delete Entry",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning
+            );
+
+            if (confirm == MessageBoxResult.Yes)
+            {
+                db.DeleteEntry(currentEntry.GetVnId());
+                library.GetAllEntries().Remove(currentEntry);
+                currentEntry = null;
+                deleteEntryBtn.Visibility = Visibility.Collapsed;
+
+                if (currentView == "title")
+                    ShowTitleView();
+                else if (currentView == "status")
+                    ShowStatusGroups();
+                else if (currentView == "category")
+                    ShowCategoryGroups();
             }
         }
 

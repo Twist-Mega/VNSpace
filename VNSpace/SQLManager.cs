@@ -34,9 +34,9 @@ namespace VNSpace
                         AltName     TEXT,
                         AvgRating   REAL,
                         VoteCount   INTEGER,
+                        ExecPath    TEXT,
 
                         PRIMARY KEY(VN_Id)
-                        ExecPath    TEXT,
                     )";
 
                 /*create USER_ENTRIES table -- stores personal user data for each VN*/

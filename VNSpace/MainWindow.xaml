@@ -65,6 +65,10 @@
                             <TextBlock Text="VNDB linked" Foreground="#7289da" FontSize="12"/>
                         </Border>
                     </StackPanel>
+                    <Button x:Name="fetchVNDBBtn" Content="Fetch VNDB Data" Click="FetchVNDBBtn_Click"
+        Margin="0 8 0 0" HorizontalAlignment="Left"
+        Background="#7289da" Foreground="#f2f3f5"
+        BorderBrush="#7289da" Padding="10 4"/>
                     <!-- Launch button -->
                     <Button x:Name="launchBtn" Content="Launch" Click="LaunchBtn_Click"
                             Margin="0 8 0 0" Width="100" HorizontalAlignment="Left"

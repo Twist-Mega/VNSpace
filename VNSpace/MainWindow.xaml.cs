@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media.Imaging;
 
 namespace VNSpace
 {
@@ -192,6 +193,7 @@ namespace VNSpace
             vndbRatingLabel.Text = selected.GetVN().GetAverageRating().HasValue ? $"{selected.GetVN().GetAverageRating()}/100" : "—";
             notesBox.Text = selected.GetNotes() ?? "";
             vndbBadge.Visibility = selected.GetVN().IsLinkedToVNDB() ? Visibility.Visible : Visibility.Collapsed;
+            voiceActorsLabel.Text = currentEntry.GetVN().GetVoiceActors() ?? "—";
 
             /*show launch button only if executable path is set*/
             execPathLabel.Text = currentEntry.GetVN().GetExecutablePath() ?? "—";
@@ -467,6 +469,57 @@ namespace VNSpace
                 MessageBox.Show($"Could not launch VN: {ex.Message}", "Launch Error",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        /*VNDB service -- handles all API communication*/
+        private VNDBI_Api_Manager vndb = new VNDBI_Api_Manager();
+
+        /*fetch VNDB data button -- pulls metadata for currently selected entry*/
+        private async void FetchVNDBBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (currentEntry == null) return;
+            if (!currentEntry.GetVN().IsLinkedToVNDB())
+            {
+                MessageBox.Show("This entry has no VNDB ID linked.", "No VNDB Link");
+                return;
+            }
+
+            /*check API is reachable first*/
+            bool reachable = await vndb.IsApiReachable();
+            if (!reachable)
+            {
+                MessageBox.Show("VNDB API is currently unreachable. Try again later.", "API Unavailable");
+                return;
+            }
+
+            /*fetch and populate VN data*/
+            bool success = await vndb.FetchById(currentEntry.GetVN().GetVNDBID()!, currentEntry.GetVN());
+            if (!success)
+            {
+                MessageBox.Show("Could not fetch data from VNDB.", "Fetch Failed");
+                return;
+            }
+
+            /*load cover art if URL was set*/
+            if (!string.IsNullOrEmpty(currentEntry.GetVN().GetCoverArtURL()))
+            {
+                BitmapImage? art = await vndb.LoadCoverArt(currentEntry.GetVN().GetCoverArtURL()!);
+                if (art != null)
+                    coverArtImage.Source = art;
+            }
+
+            /*update right panel display*/
+            companyWriterLabel.Text = $"{currentEntry.GetVN().GetCompany()} · {currentEntry.GetVN().GetWriter()}";
+            vndbRatingLabel.Text = currentEntry.GetVN().GetAverageRating().HasValue
+                                      ? $"{currentEntry.GetVN().GetAverageRating()}/100"
+                                      : "—";
+            voiceActorsLabel.Text = currentEntry.GetVN().GetVoiceActors() ?? "—";
+            vndbBadge.Visibility = Visibility.Visible;
+
+            /*save updated VN data to database*/
+            db.UpdateEntry(currentEntry, currentEntry.GetEntryId());
+
+            MessageBox.Show("VNDB data fetched successfully!", "Success");
         }
     }
 }

@@ -103,6 +103,30 @@ namespace VNSpace
             return this.name;
         }
 
+        /*voice actors field -- populated from VNDB va array*/
+        private string? voiceActors;
+
+        public string? GetVoiceActors()
+        {
+            return this.voiceActors;
+        }
+
+        public void SetVoiceActors(string actors)
+        {
+            this.voiceActors = actors;
+        }
+
+        /*setters for company and writer -- needed for VNDB population*/
+        public void SetCompany(string company)
+        {
+            this.company = company;
+        }
+
+        public void SetWriter(string writer)
+        {
+            this.writer = writer;
+        }
+
         //function to check if visual novel is linked to VNDB
         public bool IsLinkedToVNDB()
         {

@@ -1,7 +1,4 @@
-﻿/*Michael Randazzo*/
-/*Represents a user's personal log entry for a visual novel*/
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net.NetworkInformation;
 using System.Text;

@@ -1,7 +1,4 @@
-﻿/*Michael Randazzo*/
-/*Interaction logic for MainWindow.xaml*/
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
